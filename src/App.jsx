@@ -1,2 +1,56 @@
-import{useState}from"react";async function ask(msgs){const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:msgs,system:"You are APEX, an elite ultra marathon running coach. Be expert, vivid and specific."})});const d=await r.json();return d.content?.[0]?.text||"Keep pushing.";}export default function App(){const[screen,setScreen]=useState("home");const[race,setRace]=useState("");const[msgs,setMsgs]=useState([]);const[input,setInput]=useState("");const[loading,setLoading]=useState(false);const races=["5K","10K","Half Marathon","Marathon","50K Ultra","50 Mile Ultra","100K Ultra","100 Mile Ultra"];const start=async(r)=>{setRace(r);setScreen("coach");setLoading(true);const t=await ask([{role:"user",content:`Welcome me as a new athlete training for a ${r}. Be motivational and expert. 2 paragraphs.`}]);setMsgs([{role:"assistant",content:t}]);setLoading(false);};const send=async()=>{if(!input.trim()||loading)return;const m=[...msgs,{role:"user",content:input}];setMsgs(m);setInput("");setLoading(true);const t=await ask(m);setMsgs([...m,{role:"assistant",content:t}]);setLoading(false);};const s=`*{box-sizing:border-box;margin:0;padding:0}body{background:#0a1a0b;color:#e8f5e3;font-family:system-ui}.home{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}.logo{font-size:12px;letter-spacing:6px;color:#4ade80;border:1px solid #2d6a30;padding:4px 12px;margin-bottom:24px;display:inline-block}.title{font-size:64px;font-weight:900;line-height:1;margin-bottom:16px}.sub{color:#86b88a;margin-bottom:32px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:400px;margin-bottom:24px}.card{background:rgba(255,255,255,0.04);border:1px solid #1e3d20;border-radius:8px;padding:14px;cursor:pointer;font-size:14px}.card:active{border-color:#4ade80;background:rgba(74,222,128,0.1)}.coach{display:flex;flex-direction:column;height:100vh}.header{padding:14px 16px;border-bottom:1px solid #1e3d20;display:flex;align-items:center;gap:12px}.back{background:none;border:1px solid #2d6a30;color:#86b88a;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:13px}.race-tag{font-size:13px;color:#4ade80}.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.bubble{padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.6;max-width:85%}.bubble.ai{background:rgba(255,255,255,0.05);border:1px solid #1e3d20;border-radius:4px 10px 10px 10px}.bubble.user{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);margin-left:auto;border-radius:10px 10px 4px 10px}.dots{display:flex;gap:5px;padding:4px 0}.dot{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:b 1.2s infinite}.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}@keyframes b{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}.bar{padding:12px 16px;border-top:1px solid #1e3d20;display:flex;gap:8px}.inp{flex:1;background:rgba(255,255,255,0.05);border:1px solid #2d6a30;border-radius:6px;color:#e8f5e3;padding:10px 14px;font-size:15px;outline:none}.btn{background:#4ade80;color:#0a1a0b;border:none;width:42px;border-radius:6px;font-size:20px;cursor:pointer}.btn:disabled{background:#1e3d20;color:#3d6b42}`;if(screen==="home")return(<div className="home"><style>{s}</style><div className="logo">APEX</div><h1 className="title">5K to 100 Miles</h1><p className="sub">AI ultra marathon coaching</p><div className="grid">{races.map(r=><button key={r} className="card" onClick={()=>start(r)}>{r}</button>)}</div></div>);return(<div className="coach"><style>{s}</style><div className="header"><button className="back" onClick={()=>setScreen("home")}>← Back</button><span className="race-tag">🏔 {race}</span></div><div className="messages">{msgs.map((m,i)=><div key={i} className={`bubble ${m.role==="assistant"?"ai":"user"}`}>{m.content}</div>)}{loading&&<div className="bubble ai"><div className="dots"><div className="dot"/><div className="dot"/><div className="dot"/></div></div>}</div><div className="bar"><input className="inp" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask your coach..."/><button className="btn" onClick={send} disabled={loading||!input.trim()}>↑</button></div></div>);}
+import{useState}from"react";
+export default function App(){
+const[s,setS]=useState(0);
+const[r,setR]=useState("");
+const[msgs,setMsgs]=useState([]);
+const[inp,setInp]=useState("");
+const[load,setLoad]=useState(false);
+const races=["5K","10K","Half Marathon","Marathon","50K Ultra","50 Mile Ultra","100K Ultra","100 Mile Ultra"];
+async function ask(m){
+const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:m,system:"You are APEX, an elite running coach. Be expert and motivational."})});
+const d=await res.json();
+return d.content?.[0]?.text||"Keep pushing.";
+}
+async function start(race){
+setR(race);setS(1);setLoad(true);
+const t=await ask([{role:"user",content:"Welcome me as a runner training for a "+race+". 2 paragraphs."}]);
+setMsgs([{role:"assistant",content:t}]);
+setLoad(false);
+}
+async function send(){
+if(!inp.trim()||load)return;
+const m=[...msgs,{role:"user",content:inp}];
+setMsgs(m);setInp("");setLoad(true);
+const t=await ask(m);
+setMsgs([...m,{role:"assistant",content:t}]);
+setLoad(false);
+}
+if(s===0)return(
+<div style={{minHeight:"100vh",background:"#0a1a0b",color:"#e8f5e3",fontFamily:"system-ui",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px",textAlign:"center"}}>
+<div style={{fontSize:"11px",letterSpacing:"6px",color:"#4ade80",border:"1px solid #2d6a30",padding:"4px 12px",marginBottom:"24px"}}>APEX</div>
+<h1 style={{fontSize:"56px",fontWeight:"900",lineHeight:"1",marginBottom:"16px"}}>5K to 100 Miles</h1>
+<p style={{color:"#86b88a",marginBottom:"32px"}}>AI ultra marathon coaching</p>
+<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",width:"100%",maxWidth:"400px"}}>
+{races.map(r=><button key={r} onClick={()=>start(r)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid #1e3d20",borderRadius:"8px",padding:"14px",cursor:"pointer",fontSize:"14px",color:"#e8f5e3"}}>{r}</button>)}
+</div>
+</div>
+);
+return(
+<div style={{display:"flex",flexDirection:"column",height:"100vh",background:"#0a1a0b",color:"#e8f5e3",fontFamily:"system-ui"}}>
+<div style={{padding:"14px 16px",borderBottom:"1px solid #1e3d20",display:"flex",alignItems:"center",gap:"12px"}}>
+<button onClick={()=>setS(0)} style={{background:"none",border:"1px solid #2d6a30",color:"#86b88a",padding:"6px 12px",borderRadius:"4px",cursor:"pointer"}}>Back</button>
+<span style={{color:"#4ade80",fontSize:"14px"}}>APEX — {r}</span>
+</div>
+<div style={{flex:"1",overflowY:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
+{msgs.map((m,i)=><div key={i} style={{padding:"12px 14px",borderRadius:"10px",fontSize:"14px",lineHeight:"1.6",maxWidth:"85%",background:m.role==="assistant"?"rgba(255,255,255,0.05)":"rgba(74,222,128,0.12)",border:m.role==="assistant"?"1px solid #1e3d20":"1px solid rgba(74,222,128,0.3)",marginLeft:m.role==="user"?"auto":"0"}}>{m.content}</div>)}
+{load&&<div style={{padding:"12px",color:"#4ade80"}}>Thinking...</div>}
+</div>
+<div style={{padding:"12px 16px",borderTop:"1px solid #1e3d20",display:"flex",gap:"8px"}}>
+<input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Ask your coach..." style={{flex:"1",background:"rgba(255,255,255,0.05)",border:"1px solid #2d6a30",borderRadius:"6px",color:"#e8f5e3",padding:"10px 14px",fontSize:"15px",outline:"none"}}/>
+<button onClick={send} disabled={load||!inp.trim()} style={{background:"#4ade80",color:"#0a1a0b",border:"none",width:"42px",borderRadius:"6px",fontSize:"20px",cursor:"pointer"}}>↑</button>
+</div>
+</div>
+);
+}
+
 
