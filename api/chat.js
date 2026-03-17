@@ -5,7 +5,8 @@ const contents=system?[{role:"user",parts:[{text:"System: "+system}]},{role:"mod
 try{
 const key=process.env.GEMINI_API_KEY;
 if(!key)return res.status(500).json({error:"No API key found"});
-const url="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+key;
+const url="https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
+?key="+key;
 const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contents,generationConfig:{maxOutputTokens:1000,temperature:0.8}})});
 const data=await response.json();
 console.log("Gemini response:",JSON.stringify(data));
